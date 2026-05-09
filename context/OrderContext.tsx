@@ -379,9 +379,6 @@ export const OrderProvider: React.FC<{
             if (branchId) {
                 query = query.eq('branch_id', branchId);
             }
-            if (user?.role !== 'SuperAdmin' && user?.restaurantId && user?.restaurantId !== 'null') {
-                query = query.eq('restaurant_id', user.restaurantId);
-            }
 
             let dateLimitString;
             let queryLimit;
@@ -426,9 +423,11 @@ export const OrderProvider: React.FC<{
                     allInventoryTransactions: { ...prev.allInventoryTransactions, [branchId]: mappedTransactions }
                 }));
                 localStorage.setItem(`ziroo_transactions_${branchId}`, JSON.stringify(mappedTransactions));
+                localStorage.removeItem('DEBUG_TX_ERROR');
             }
-        } catch (e) {
+        } catch (e: any) {
             console.warn("⚠️ Inventory fetch failed, checking cache:", e);
+            localStorage.setItem('DEBUG_TX_ERROR', e?.message || JSON.stringify(e));
             const cached = localStorage.getItem(`ziroo_transactions_${branchId}`);
             if (cached) {
                 setOrderState(prev => ({
@@ -702,6 +701,13 @@ export const OrderProvider: React.FC<{
         if (error) throw error;
 
         // 3. Proactive Local Update
+        setActiveCashRegister({
+            id: data.id,
+            branchId: data.branch_id,
+            openingAmount: data.opening_amount,
+            status: data.status,
+            openedByName: data.opened_by_name
+        });
         fetchCashRegisters(true);
     };
 
@@ -725,6 +731,25 @@ export const OrderProvider: React.FC<{
 
         const totalCashSales = summary?.total_cash_sales || 0;
         const expected = activeCashRegister.openingAmount + totalCashSales - totalExpenses;
+
+        const diff = physicsAmount - expected;
+
+        // 2. Close it
+        const { error } = await supabase.from('cash_registers').update({
+            status: 'closed',
+            closing_amount: physicsAmount,
+            expected_amount: expected,
+            difference: diff,
+            closed_at: new Date().toISOString(),
+            closed_by_name: currentUser.name || currentUser.email
+        }).eq('id', activeCashRegister.id);
+
+        if (error) throw error;
+
+        // 3. Proactive Local Update
+        setActiveCashRegister(null);
+        fetchCashRegisters(true);
+    };
 
     // ===== DATA RETENTION & CLEANUP =====
 
@@ -900,25 +925,6 @@ export const OrderProvider: React.FC<{
         }
     }, [activeBranchId, currentUser]);
 
-        const diff = physicsAmount - expected;
-
-        // 2. Close it
-        const { error } = await supabase.from('cash_registers').update({
-            status: 'closed',
-            closing_amount: physicsAmount,
-            expected_amount: expected,
-            difference: diff,
-            closed_at: new Date().toISOString(),
-            closed_by_name: currentUser.name || currentUser.email
-        }).eq('id', activeCashRegister.id);
-
-        if (error) throw error;
-
-        // 3. Proactive Local Update
-        setActiveCashRegister(null);
-        fetchCashRegisters(true);
-    };
-
     // ===== CREAR ORDEN =====
 
     const addOrder = async (
@@ -1021,7 +1027,7 @@ export const OrderProvider: React.FC<{
             timestamp: new Date(insertedOrder.created_at)
         };
 
-        // OPTIMISTIC UPDATE
+        // OPTIMISTIC UPDATE FOR ORDERS
         setOrderState(prev => {
             const currentOrders = prev.allOrders[branch] || [];
             return {
@@ -1032,6 +1038,43 @@ export const OrderProvider: React.FC<{
                 }
             };
         });
+
+        // OPTIMISTIC UPDATE FOR STOCK
+        const branchItems = allMenuItems[branch] || [];
+        const stockUpdates = [...branchItems];
+        let stockChanged = false;
+
+        orderData.items.forEach(orderItem => {
+            const itemId = orderItem.menuItem.id;
+            const variationId = orderItem.variation?.id;
+            const quantity = orderItem.quantity;
+
+            const itemIndex = stockUpdates.findIndex(i => i.id === itemId);
+            if (itemIndex !== -1) {
+                const updatedItem = { ...stockUpdates[itemIndex] };
+                
+                if (variationId) {
+                    if (updatedItem.variations) {
+                        updatedItem.variations = updatedItem.variations.map(v =>
+                            (v.id === variationId && v.stock !== undefined && v.stock !== null)
+                                ? { ...v, stock: v.stock - quantity } 
+                                : v
+                        );
+                        stockChanged = true;
+                    }
+                } else {
+                    if (updatedItem.stock !== undefined && updatedItem.stock !== null) {
+                        updatedItem.stock = updatedItem.stock - quantity;
+                        stockChanged = true;
+                    }
+                }
+                stockUpdates[itemIndex] = updatedItem;
+            }
+        });
+
+        if (stockChanged) {
+            updateMenuItemStock(branch, stockUpdates);
+        }
 
         // STOCK DEDUCTION handled by DB Trigger (tr_deduct_stock)
 
@@ -1197,6 +1240,34 @@ export const OrderProvider: React.FC<{
         if (rpcData && !rpcData.success) {
             console.error("RPC Error updating stock:", rpcData.error);
         }
+
+        // 3. Proactive Local Update for Reports/Analytics (Añadidos column, Inventory logs)
+        // Optimistic update for transactions so DailySales re-renders immediately with the added amount
+        const newTx = {
+            id: 'temp-' + Date.now(),
+            branchId: activeBranchId,
+            menuItemId: itemId,
+            variationId: variationId || null,
+            itemName: newMenuItems.find(m => m.id === itemId)?.name + (variationId ? ' (Variation)' : ''),
+            quantity: quantity,
+            timestamp: new Date(),
+            userId: currentUser.id,
+            userName: currentUser.full_name || 'Usuario',
+            type: type
+        };
+
+        setOrderState(prev => {
+            const currentBranchTxs = prev.allInventoryTransactions[activeBranchId] || [];
+            return {
+                ...prev,
+                allInventoryTransactions: {
+                    ...prev.allInventoryTransactions,
+                    [activeBranchId]: [newTx, ...currentBranchTxs]
+                }
+            };
+        });
+
+        await fetchTransactions();
     };
 
     const setInventoryStock = async (itemId: string, variationId: string | undefined, newStock: number | null) => {
@@ -1204,6 +1275,18 @@ export const OrderProvider: React.FC<{
 
         // 1. OPTIMISTIC UPDATE
         const branchItems = allMenuItems[activeBranchId] || [];
+        
+        // Find current stock to calculate delta for the transaction log
+        let currentStock = 0;
+        const targetItem = branchItems.find(i => i.id === itemId);
+        if (targetItem) {
+            if (variationId) {
+                currentStock = targetItem.variations?.find(v => v.id === variationId)?.stock || 0;
+            } else {
+                currentStock = targetItem.stock || 0;
+            }
+        }
+
         const newMenuItems = branchItems.map(item => {
             if (item.id === itemId) {
                 const updatedItem = { ...item };
@@ -1241,6 +1324,34 @@ export const OrderProvider: React.FC<{
         } catch (error) {
             console.error("Unknown Execution Error setting stock:", error);
         }
+
+        // 3. Proactive Local Update
+        const quantityChange = (newStock || 0) - currentStock;
+        const newTx = {
+            id: 'temp-' + Date.now(),
+            branchId: activeBranchId,
+            menuItemId: itemId,
+            variationId: variationId || null,
+            itemName: newMenuItems.find(m => m.id === itemId)?.name + (variationId ? ' (Variation)' : ''),
+            quantity: quantityChange, // Difference!
+            timestamp: new Date(),
+            userId: currentUser.id,
+            userName: currentUser.full_name || 'Usuario',
+            type: 'Adjustment'
+        };
+
+        setOrderState(prev => {
+            const currentBranchTxs = prev.allInventoryTransactions[activeBranchId] || [];
+            return {
+                ...prev,
+                allInventoryTransactions: {
+                    ...prev.allInventoryTransactions,
+                    [activeBranchId]: [newTx, ...currentBranchTxs]
+                }
+            };
+        });
+
+        await fetchTransactions();
     };
 
     const updateInventoryTransaction = (id: string, quantity: number) => {

@@ -89,10 +89,10 @@ const DailySales: React.FC = () => {
 
     const todaysInventoryTransactions = useMemo(() => {
         const transactions = allInventoryTransactions[activeBranchId!] || [];
-        // Filter to show ONLY manual additions (Restock). Sales and Returns should not appear here.
+        // Filter to show ONLY manual additions (Restock and positive Adjustments).
         return transactions.filter(tx =>
             isTodayBolivia(tx.timestamp) &&
-            tx.type === 'Restock'
+            (tx.type === 'Restock' || (tx.type === 'Adjustment' && tx.quantity > 0))
         ).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     }, [allInventoryTransactions, activeBranchId]);
 
@@ -166,9 +166,10 @@ const DailySales: React.FC = () => {
         const addedToday: Record<string, number> = {};
         transactions.forEach(tx => {
             if (!isTodayBolivia(tx.timestamp)) return;
-            if (tx.type !== 'Restock') return;
-            const key = tx.variationId ? `${tx.menuItemId}-${tx.variationId}` : tx.menuItemId;
-            addedToday[key] = (addedToday[key] || 0) + (tx.quantity || 0);
+            if (tx.type === 'Restock' || (tx.type === 'Adjustment' && tx.quantity > 0)) {
+                const key = tx.variationId ? `${tx.menuItemId}-${tx.variationId}` : tx.menuItemId;
+                addedToday[key] = (addedToday[key] || 0) + (tx.quantity || 0);
+            }
         });
 
         // Track items SOLD from Today's Orders (regardless of final delivery status)

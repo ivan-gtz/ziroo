@@ -368,22 +368,22 @@ const Dashboard: React.FC = () => {
                 </Card>
 
                 {/* Cash Register Card */}
-                <Card className={`p-5 border-l-4 ${activeBranch?.isOpen ? 'border-primary-500' : 'border-red-500'}`}>
+                <Card className={`p-5 border-l-4 ${!!activeCashRegister ? 'border-primary-500' : 'border-red-500'}`}>
                     <div className="flex justify-between items-center">
                         <div className="flex items-center">
-                            <div className={`p-3 rounded-full ${activeBranch?.isOpen ? 'bg-primary-100 dark:bg-primary-900 text-primary-500' : 'bg-red-100 dark:bg-red-900 text-red-500'}`}>
+                            <div className={`p-3 rounded-full ${!!activeCashRegister ? 'bg-primary-100 dark:bg-primary-900 text-primary-500' : 'bg-red-100 dark:bg-red-900 text-red-500'}`}>
                                 <DollarSign size={24} />
                             </div>
                             <div className="ml-4">
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Estado de Caja</p>
-                                <p className="text-xl font-bold">{activeBranch?.isOpen ? 'Caja Abierta' : 'Caja Cerrada'}</p>
-                                {activeCashRegister && activeBranch?.isOpen && (
+                                <p className="text-xl font-bold">{!!activeCashRegister ? 'Caja Abierta' : 'Caja Cerrada'}</p>
+                                {activeCashRegister && (
                                     <p className="text-xs text-gray-500 dark:text-gray-400">Iniciada con: {formatCurrency(activeCashRegister.openingAmount)}</p>
                                 )}
                             </div>
                         </div>
                         <div>
-                            {activeBranch?.isOpen ? (
+                            {!!activeCashRegister ? (
                                 <button
                                     onClick={handlePrepareClose}
                                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
