@@ -1,0 +1,5 @@
+{
+  "name": "Ziroo - Restaurant OS",
+  "description": "A complete web application for restaurant management, featuring menu administration, table orders, a kitchen display system, and a customer-facing QR menu. Enhanced with AI-powered suggestions for menu improvement and a modern, responsive interface with dark/light modes and multi-language support.",
+  "requestFramePermissions": []
+}

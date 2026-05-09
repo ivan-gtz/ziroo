@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/logo-green.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ziroo chef</title>
+  <meta property="og:title" content="Ziroo chef" />
+  <meta property="og:description" content="Ziroo chef - Software para Restaurantes y Reparto" />
+  <meta property="og:image" content="/logo-green.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ziroo.app/" />
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Ziroo chef" />
+  <meta name="twitter:description" content="Ziroo chef - Software para Restaurantes y Reparto" />
+  <meta name="twitter:image" content="/logo-green.png" />
+
+  <!-- Tailwind CSS integrated via build pipeline or fallback script removed for production -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap">
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.553.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0"
+  }
+}
+</script>
+  <style>
+    /* Critical for Thermal Printing: Remove browser margins/headers */
+    @page {
+      margin: 0;
+      size: auto;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      #receipt-print,
+      #receipt-print * {
+        visibility: visible;
+      }
+
+      #receipt-print {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Ensure backgrounds render if option not checked in browser */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        /* Chrome, Safari, Edge */
+        print-color-adjust: exact !important;
+        /* Firefox */
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="/index.css">
+  <link rel="manifest" href="/manifest.json">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('SW registered: ', registration);
+          })
+          .catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,308 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --dark-mode: class;
+  --color-primary-50: #e6f9ef;
+  --color-primary-100: #ccefdc;
+  --color-primary-200: #99dfb9;
+  --color-primary-300: #66d096;
+  --color-primary-400: #33c073;
+  --color-primary-500: #06c167;
+  --color-primary-600: #05ae5d;
+  --color-primary-700: #048a4a;
+  --color-primary-800: #036738;
+  --color-primary-900: #024325;
+  --color-primary-950: #012a19;
+
+  --color-accent-50: #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #fbbf24;
+  --color-accent-500: #f59e0b;
+  --color-accent-600: #d97706;
+  --color-accent-700: #b45309;
+  --color-accent-800: #92400e;
+  --color-accent-900: #78350f;
+  --color-accent-950: #451a03;
+
+  --color-pending: #f59e0b;
+  --color-preparing: #0ea5e9;
+  --color-ready: #06c167;
+
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-barcode: "Libre Barcode 39", cursive;
+
+  --animate-bell-ring: bell-ring 1s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-fade-out: fade-out 0.5s ease-in;
+  --animate-fly-to-cart: fly-to-cart 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  --animate-pop-in: pop-in 0.4s cubic-bezier(0.26, 0.53, 0.74, 1.48) forwards;
+  --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
+
+  @keyframes bell-ring {
+
+    0%,
+    100% {
+      transform: rotate(0)
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: rotate(-10deg)
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: rotate(10deg)
+    }
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0
+    }
+
+    100% {
+      opacity: 1
+    }
+  }
+
+  @keyframes fade-out {
+    0% {
+      opacity: 1
+    }
+
+    100% {
+      opacity: 0
+    }
+  }
+
+  @keyframes fly-to-cart {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    100% {
+      top: var(--target-y);
+      left: var(--target-x);
+      transform: translate(-50%, -50%) scale(0.2);
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes pop-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes pulse-subtle {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.95;
+      transform: scale(1.02);
+    }
+  }
+
+  /* Professional Splash Animations */
+  @keyframes splash-logo {
+    0% {
+      opacity: 0;
+      transform: scale(0.5) translateY(20px);
+    }
+
+    60% {
+      opacity: 1;
+      transform: scale(1.1) translateY(-10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes splash-text {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes splash-bg {
+    0% {
+      transform: scale(1.2);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes loading-bar {
+    0% {
+      width: 0%;
+      transform: translateX(-100%);
+    }
+
+    100% {
+      width: 100%;
+      transform: translateX(0);
+    }
+  }
+
+  --animate-splash-logo: splash-logo 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  --animate-splash-text: splash-text 0.8s ease-out 0.4s forwards;
+  --animate-splash-bg: splash-bg 2s ease-out forwards;
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300;
+  }
+
+  /* Manual Dark Mode Override */
+  .dark {
+    color-scheme: dark;
+    --color-white: #d8d9db;
+    --color-gray-50: #c7c8ca;
+    --color-gray-100: #cccdcf;
+    --color-gray-200: #cccdce;
+    /* Special text overrides to ensure visibility */
+    --color-gray-50-text: #f9fafb;
+    --color-gray-100-text: #f3f4f6;
+    --color-gray-200-text: #e5e7eb;
+    --color-gray-300-text: #d1d5db;
+
+    /* We restore the natural light gray variables for text usage if needed, 
+       but the best approach is to define specific text colors if base variables are inverted for backgrounds. 
+       However, to hit all titles/paragraphs, we should just make sure common gray text classes are light. */
+
+    --color-gray-900: #222324;
+    /* Titles */
+    --color-gray-800: #383737;
+    --color-gray-700: #272a2e;
+    /* Subtitles */
+    --color-gray-600: #242425;
+    /* Body text */
+    --color-gray-500: #a4a9b1;
+
+    /* Background overrides still need to be dark */
+    --color-gray-950: #030712;
+  }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Custom Scrollbar - Cross-browser compatible */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(6, 193, 103, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(6, 193, 103, 0.3);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 193, 103, 0.5);
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(6, 193, 103, 0.4) transparent;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(6, 193, 103, 0.4);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 193, 103, 0.6);
+}
+
+/* Transitions */
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 200ms ease-in;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}

@@ -1,0 +1,39 @@
+{
+  "name": "ziroo---restaurant-os",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.87.1",
+    "@tailwindcss/vite": "^4.1.18",
+    "@turf/helpers": "^7.3.4",
+    "@turf/union": "^7.3.4",
+    "@types/leaflet": "^1.9.21",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.553.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.9.6",
+    "recharts": "^3.4.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.23",
+    "firebase-tools": "^15.12.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}
