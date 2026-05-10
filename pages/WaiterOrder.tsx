@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 // Layout Refreshed: WaiterOrder Desktop Grid + Persistent Cart + Fixed Checkout (FIXED DUPLICATE)
 import { useAppContext } from '../context/AppContext';
 import { useOrder } from '../context/OrderContext';
@@ -468,6 +469,7 @@ const CountdownTimer: React.FC<{ timestamp: Date }> = ({ timestamp }) => {
 
 
 const WaiterOrder: React.FC = () => {
+    const navigate = useNavigate();
     // State for placement feedback
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -1958,7 +1960,7 @@ const WaiterOrder: React.FC = () => {
                             </p>
                             <div className="space-y-3">
                                 <Button
-                                    onClick={() => window.location.href = '/tablero'}
+                                    onClick={() => navigate('/')}
                                     className="w-full bg-primary-600 hover:bg-primary-700 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary-500/20"
                                 >
                                     <DollarSign className="w-5 h-5" />
