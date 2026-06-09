@@ -1,0 +1,13 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/m/:branchId",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/menu/:branchId",
+      "destination": "/index.html"
+    }
+  ]
+}

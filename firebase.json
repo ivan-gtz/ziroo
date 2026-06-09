@@ -6,18 +6,6 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "redirects": [
-      {
-        "source": "/m/:branchId",
-        "destination": "https://djvuzwtenvqtlpqohhlg.supabase.co/functions/v1/share?id=:branchId",
-        "type": 302
-      },
-      {
-        "source": "/menu/:branchId",
-        "destination": "https://djvuzwtenvqtlpqohhlg.supabase.co/functions/v1/share?id=:branchId",
-        "type": 302
-      }
-    ],
     "rewrites": [
       {
         "source": "**",
