@@ -71,13 +71,7 @@ const SocialFooter: React.FC<{ branchId: string }> = ({ branchId }) => {
   const websiteUrl = settings.websiteUrl;
   const restaurantMapsLink = settings.restaurantMapsLink;
 
-  const hasLinks =
-    (socialLinks && Object.values(socialLinks).some((link) => link)) ||
-    websiteUrl || restaurantMapsLink;
-
-  if (!hasLinks) {
-    return null;
-  }
+  const hasLinks = true; // Always show footer as it contains the Share Button now
 
   return (
     <footer className="w-full py-8 mt-auto border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
@@ -163,18 +157,21 @@ const SocialFooter: React.FC<{ branchId: string }> = ({ branchId }) => {
           
           <button
             onClick={() => {
-              const url = `https://rstfumgexuhhgdyyvnfk.supabase.co/functions/v1/share?id=${branchId}`;
+              const shareUrl = `https://rstfumgexuhhgdyyvnfk.supabase.co/functions/v1/share?id=${branchId}`;
+              const shareTitle = settings.restaurantName || "Menú Digital";
+              const shareText = `¡Mira el menú de ${settings.restaurantName} y haz tu pedido en línea! 🍔🥤`;
+              
               if (navigator.share) {
                 navigator.share({
-                  title: settings.shareTitle || "Menú Digital",
-                  text: settings.shareDescription || "¡Mira nuestro menú y pide en línea!",
-                  url: url
+                  title: shareTitle,
+                  text: shareText,
+                  url: shareUrl
                 }).catch(() => {
-                   navigator.clipboard.writeText(url);
+                   navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
                    alert("¡Link copiado al portapapeles!");
                 });
               } else {
-                navigator.clipboard.writeText(url);
+                navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
                 alert("¡Link copiado al portapapeles!");
               }
             }}

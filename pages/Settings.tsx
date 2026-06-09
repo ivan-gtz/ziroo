@@ -6,7 +6,7 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { compressImageToBlob } from '../lib/imageUtils';
 import { uploadToStorage } from '../lib/storageUtils';
-import { AlertCircle, Upload, FileSpreadsheet, FileText, History, Printer, Download, MapPin, Truck, Globe, BarChart as BarChartIcon } from 'lucide-react';
+import { AlertCircle, Upload, FileSpreadsheet, FileText, History, Printer, Download, MapPin, Truck, Globe, Share2, BarChart as BarChartIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { generateYearlyReportData, downloadYearlyExcel, downloadYearlyPDF, downloadRCVExcel, downloadRCVPDF } from '../utils/reportGenerator';
 import { useReceiptActions } from '../components/PrintingProvider';
@@ -371,7 +371,30 @@ const Settings: React.FC = () => {
                                     <input type="checkbox" checked={isMenuEnabled} onChange={(e) => setIsMenuEnabled(e.target.checked)} />
                                     <span>{t('settings.enable_digital_menu')}</span>
                                 </label>
-                                <label className="flex items-center space-x-2">
+
+                                {isMenuEnabled && (
+                                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
+                                        <h4 className="text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                                            <Share2 size={12} /> Link Amigable
+                                        </h4>
+                                        <div className="flex gap-2">
+                                            <div className="flex-1 bg-white dark:bg-gray-800 px-2 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 text-[9px] font-mono text-gray-600 dark:text-gray-400 truncate">
+                                                {`https://rstfumgexuhhgdyyvnfk.supabase.co/functions/v1/share?id=${activeBranchId}`}
+                                            </div>
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    const url = `https://rstfumgexuhhgdyyvnfk.supabase.co/functions/v1/share?id=${activeBranchId}`;
+                                                    navigator.clipboard.writeText(url);
+                                                    alert("¡Link copiado!");
+                                                }}
+                                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all active:scale-95"
+                                            >
+                                                Copiar
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}                                <label className="flex items-center space-x-2">
                                     <input type="checkbox" checked={enableSound} onChange={(e) => setEnableSound(e.target.checked)} />
                                     <span>Activar Sonido de Notificaciones</span>
                                 </label>
