@@ -314,12 +314,31 @@ export const MenuProvider: React.FC<{ children: ReactNode, activeBranchId: strin
     const addMenuItem = async (item: Omit<MenuItem, 'id'>) => {
         if (!activeBranchId) return;
 
-        // 1. Insert Item
+        // 1. Resolve restaurantId from the current branch if not available in user (SuperAdmin)
+        // We look it up in the menuState's cached branches or expect it from the branch object
+        // But the most reliable way is to let Supabase handles it if possible or fetch it.
+        // Given our context structure, we can get it from activeBranch in RestaurantContext, 
+        // but MenuContext doesn't have direct access to it easily without extra hooks.
+        // However, MenuContext is inside RestaurantProvider in AppContext, so we can't use useRestaurant here.
+        // Instead, we'll fetch the branch info once if we don't have it.
+        
+        let restaurantId = currentUser?.restaurantId;
+        
+        if (!restaurantId || restaurantId === 'null') {
+            const { data: branchData } = await supabase
+                .from('branches')
+                .select('restaurant_id')
+                .eq('id', activeBranchId)
+                .single();
+            if (branchData) restaurantId = branchData.restaurant_id;
+        }
+
+        // 2. Insert Item
         const { data: insertedItem, error } = await supabase
             .from('menu_items')
             .insert({
                 branch_id: activeBranchId,
-                restaurant_id: currentUser?.restaurantId,
+                restaurant_id: restaurantId,
                 category_id: item.category,
                 name: item.name,
                 description: item.description,
@@ -508,19 +527,20 @@ export const MenuProvider: React.FC<{ children: ReactNode, activeBranchId: strin
 
     const addCategory = async (cat: Omit<Category, 'id'>) => {
         if (!activeBranchId) return;
+
+        let restaurantId = currentUser?.restaurantId;
+        if (!restaurantId || restaurantId === 'null') {
+            const { data: branchData } = await supabase.from('branches').select('restaurant_id').eq('id', activeBranchId).single();
+            if (branchData) restaurantId = branchData.restaurant_id;
+        }
+
         await supabase.from('categories').insert({
             branch_id: activeBranchId,
-            restaurant_id: currentUser?.restaurantId,
+            restaurant_id: restaurantId,
             name: cat.name,
             icon_type: cat.iconType,
             icon_value: cat.iconValue
         }).select('id, name, icon_type, icon_value').single();
-
-        // Optimistic Update (using temp ID if needed, but here we likely rely on refetch for ID)
-        // However, we can append it if we have the ID, or just wait for subscription. 
-        // For smoother UX, we can try to assume success if we used a UUID generator locally, 
-        // but categories are less 'high frequency'. We'll leave Category optimistic update simple for now 
-        // or trigger a fetch immediately.
     };
 
     const updateCategory = async (cat: Category) => {
@@ -541,9 +561,16 @@ export const MenuProvider: React.FC<{ children: ReactNode, activeBranchId: strin
 
     const addProductExtra = async (extra: Omit<ProductExtra, 'id'>) => {
         if (!activeBranchId) return;
+
+        let restaurantId = currentUser?.restaurantId;
+        if (!restaurantId || restaurantId === 'null') {
+            const { data: branchData } = await supabase.from('branches').select('restaurant_id').eq('id', activeBranchId).single();
+            if (branchData) restaurantId = branchData.restaurant_id;
+        }
+
         await supabase.from('product_extras').insert({
             branch_id: activeBranchId,
-            restaurant_id: currentUser?.restaurantId,
+            restaurant_id: restaurantId,
             name: extra.name,
             price: extra.price
         }).select('id, name, price').single();
