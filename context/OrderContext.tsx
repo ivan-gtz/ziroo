@@ -160,22 +160,6 @@ export const OrderProvider: React.FC<{
     };
 
     const mapRawOrder = (o: any): Order => {
-        const items = (o.order_items || []).map((i: any) => ({
-            menuItem: {
-                id: i.menu_item_id,
-                name: i.menu_item?.name || i.name_snapshot || 'Unknown',
-                price: i.unit_price,
-                category: i.menu_item?.category_id || 'unknown'
-            },
-            quantity: i.quantity,
-            variation: i.variation_id ? { id: i.variation_id, name: i.variation?.name } : undefined,
-            selectedExtras: (i.order_item_extras || i.order_item_extra || []).map((e: any) => ({
-                id: e.extra_id,
-                name: e.name_snapshot || 'Extra',
-                price: e.price_at_time || e.unit_price || 0
-            }))
-        }));
-
         return {
             id: o.id,
             dailyTicketNumber: o.daily_ticket_number,
@@ -204,19 +188,28 @@ export const OrderProvider: React.FC<{
             fiscalNumber: o.fiscal_number,
             customerPhone: o.customer_phone,
             isSharedWithDrivers: o.is_shared_with_drivers,
-            assignedDriverId: o.assigned_driver_id,
+            assigned_driver_id: o.assigned_driver_id,
             driverFlowStatus: o.driver_flow_status,
             items: (o.order_items || []).map((item: any) => ({
-                id: item.id,
+                menuItem: {
+                    id: item.menu_item_id,
+                    name: item.menu_item?.name || item.name_snapshot || 'Unknown',
+                    price: Number(item.unit_price),
+                    category: item.menu_item?.category_id || 'unknown',
+                    isCombo: item.menu_item?.is_combo,
+                    mainProductId: item.menu_item?.main_product_id,
+                    mainVariantId: item.menu_item?.main_variant_id,
+                    comboItems: item.menu_item?.combo_items
+                },
                 quantity: item.quantity,
-                unitPrice: Number(item.unit_price),
-                nameSnapshot: item.name_snapshot,
-                menuItem: item.menu_item,
-                variation: item.variation,
-                extras: (item.order_item_extras || []).map((ex: any) => ({
-                    id: ex.id,
-                    nameSnapshot: ex.name_snapshot,
-                    priceAtTime: Number(ex.price_at_time)
+                variation: item.variation_id ? { 
+                    id: item.variation_id, 
+                    name: item.variation?.name || 'Variación' 
+                } : undefined,
+                selectedExtras: (item.order_item_extras || []).map((ex: any) => ({
+                    id: ex.extra_id,
+                    name: ex.name_snapshot || 'Extra',
+                    price: Number(ex.price_at_time || 0)
                 }))
             })),
             assignedDriver: o.delivery_drivers ? {
@@ -283,9 +276,9 @@ export const OrderProvider: React.FC<{
                 delivery_drivers(name, phone, license_number, profile_image),
                 order_items (
                     id, quantity, unit_price, name_snapshot, menu_item_id, variation_id,
-                    menu_item:menu_items(id, name, price, category_id),
-                    variation:menu_item_variations(name),
-                    order_item_extras (id, name_snapshot, price_at_time)
+                    menu_item:menu_items(id, name, price, category_id, is_combo, main_product_id, main_variant_id, combo_items),
+                    variation:menu_item_variations(id, name),
+                    order_item_extras (id, extra_id, name_snapshot, price_at_time)
                 )`;
             }
 

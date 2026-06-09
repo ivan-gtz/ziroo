@@ -59,6 +59,21 @@ const Analytics: React.FC = () => {
                 }
                 productCount[key].quantity += item.quantity;
 
+                // Buscar el item completo para tener la info de combos
+                const fullItem = menuItems.find(mi => mi.id === item.menuItem.id) || item.menuItem;
+
+                // ADDED: CONTAR PRODUCTO PRINCIPAL DEL COMBO
+                if (fullItem.isCombo && fullItem.mainProductId) {
+                    const mapping = uuidKeyMap[fullItem.mainVariantId || fullItem.mainProductId];
+                    const mainKey = mapping ? mapping.key : fullItem.mainProductId;
+                    const mainName = mapping ? mapping.name : 'Componente Principal';
+
+                    if (!productCount[mainKey]) {
+                        productCount[mainKey] = { name: mainName, quantity: 0 };
+                    }
+                    productCount[mainKey].quantity += item.quantity;
+                }
+
                 // ADDED: Include extras/companions in most sold counts
                 if (item.selectedExtras && item.selectedExtras.length > 0) {
                     item.selectedExtras.forEach(extra => {

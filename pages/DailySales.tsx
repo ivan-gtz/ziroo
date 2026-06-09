@@ -178,10 +178,24 @@ const DailySales: React.FC = () => {
         // Usar todaysInventoryOrders para asegurar consistencia con lo que resta stock
         todaysInventoryOrders.forEach(order => {
             order.items.forEach(item => {
+                // Buscar el item completo para tener la info de combos
+                const fullItem = menuItems.find(mi => mi.id === item.menuItem.id) || item.menuItem;
+                
                 const key = item.variation?.id ? `${item.menuItem.id}-${item.variation.id}` : item.menuItem.id;
                 soldInOrders[key] = (soldInOrders[key] || 0) + (item.quantity || 0);
 
-                // CONTAR COMPONENTES DE COMBOS (Extras que son productos)
+                // CONTAR PRODUCTO PRINCIPAL DEL COMBO
+                if (fullItem.isCombo && fullItem.mainProductId) {
+                    const mainKey = fullItem.mainVariantId 
+                        ? `${fullItem.mainProductId}-${fullItem.mainVariantId}` 
+                        : fullItem.mainProductId;
+                    
+                    // Usamos uuidToKey para mapear el ID (sea variación o producto) a su llave del reporte
+                    const reportKey = uuidToKey[fullItem.mainVariantId || fullItem.mainProductId] || mainKey;
+                    soldInOrders[reportKey] = (soldInOrders[reportKey] || 0) + (item.quantity || 0);
+                }
+
+                // CONTAR COMPONENTES DE COMBOS (Extras que son productos o seleccionables)
                 // Usamos uuidToKey para mapear IDs de variaciones/productos a sus llaves del reporte
                 if (item.selectedExtras && item.selectedExtras.length > 0) {
                     item.selectedExtras.forEach(extra => {
