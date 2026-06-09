@@ -375,16 +375,16 @@ const Settings: React.FC = () => {
                                 {isMenuEnabled && (
                                     <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
                                         <h4 className="text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
-                                            <Share2 size={12} /> Link Amigable
+                                            <Share2 size={12} /> Link del Menú
                                         </h4>
                                         <div className="flex gap-2">
                                             <div className="flex-1 bg-white dark:bg-gray-800 px-2 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 text-[9px] font-mono text-gray-600 dark:text-gray-400 truncate">
-                                                {`${window.location.origin}/m/${activeBranchId}`}
+                                                {`${window.location.origin}/#/customer/branch/${activeBranchId}/table/1`}
                                             </div>
                                             <button 
                                                 type="button"
                                                 onClick={() => {
-                                                    const url = `${window.location.origin}/m/${activeBranchId}`;
+                                                    const url = `${window.location.origin}/#/customer/branch/${activeBranchId}/table/1`;
                                                     navigator.clipboard.writeText(url);
                                                     alert("¡Link copiado!");
                                                 }}

@@ -157,7 +157,7 @@ const SocialFooter: React.FC<{ branchId: string }> = ({ branchId }) => {
           
           <button
             onClick={() => {
-              const shareUrl = `${window.location.origin}/m/${branchId}`;
+              const shareUrl = `${window.location.origin}/#/customer/branch/${branchId}/table/1`;
               const shareTitle = settings.restaurantName || "Menú Digital";
               const shareText = `¡Mira el menú de ${settings.restaurantName} y haz tu pedido en línea! 🍔🥤`;
               

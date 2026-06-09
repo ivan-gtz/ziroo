@@ -2,10 +2,6 @@
   RewriteEngine On
   RewriteBase /
 
-  # Friendly share links rewrite to index.html for client-side routing
-  RewriteRule ^m/([^/]+)$ /index.html [L]
-  RewriteRule ^menu/([^/]+)$ /index.html [L]
-
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
