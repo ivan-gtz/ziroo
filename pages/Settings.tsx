@@ -379,12 +379,12 @@ const Settings: React.FC = () => {
                                         </h4>
                                         <div className="flex gap-2">
                                             <div className="flex-1 bg-white dark:bg-gray-800 px-2 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 text-[9px] font-mono text-gray-600 dark:text-gray-400 truncate">
-                                                {`https://rstfumgexuhhgdyyvnfk.supabase.co/functions/v1/share?id=${activeBranchId}`}
+                                                {`${window.location.origin}/m/${activeBranchId}`}
                                             </div>
                                             <button 
                                                 type="button"
                                                 onClick={() => {
-                                                    const url = `https://rstfumgexuhhgdyyvnfk.supabase.co/functions/v1/share?id=${activeBranchId}`;
+                                                    const url = `${window.location.origin}/m/${activeBranchId}`;
                                                     navigator.clipboard.writeText(url);
                                                     alert("¡Link copiado!");
                                                 }}

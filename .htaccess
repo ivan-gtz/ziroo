@@ -1,6 +1,11 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # Friendly share links redirect to Supabase Edge Function for metadata generation
+  RewriteRule ^m/([^/]+)$ https://djvuzwtenvqtlpqohhlg.supabase.co/functions/v1/share?id=$1 [R=302,L]
+  RewriteRule ^menu/([^/]+)$ https://djvuzwtenvqtlpqohhlg.supabase.co/functions/v1/share?id=$1 [R=302,L]
+
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
